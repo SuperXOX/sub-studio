@@ -1,0 +1,24 @@
+name: Windows build and subtitle regression tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and run all 128 deterministic checks
+        shell: pwsh
+        run: ./scripts/build.ps1 -TraditionalOnly
+      - name: Verify public source inventory
+        shell: pwsh
+        run: ./scripts/verify-source.ps1
+      - name: Upload Traditional-only portable build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: SUB-Studio-Windows-x64-Traditional
+          path: dist/SUB Studio/
+          if-no-files-found: error

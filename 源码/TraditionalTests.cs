@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Web.Script.Serialization;
+
+public static class TraditionalTests {
+ static int checks; static Type jobType; static string root;
+ static void Assert(bool okay,string name){if(!okay)throw new Exception("FAIL: "+name);checks++;Console.WriteLine("PASS: "+name);}
+ static object Job(Action<string> log){return Activator.CreateInstance(jobType,new object[]{root,log});}
+ static object Call(object job,string method,params object[] args){try{return jobType.GetMethod(method).Invoke(job,args);}catch(TargetInvocationException ex){throw ex.InnerException;}}
+ static Dictionary<string,object> Run(object job,string path){var serializer=new JavaScriptSerializer();return serializer.Deserialize<Dictionary<string,object>>(serializer.Serialize(Call(job,"TranslateFile",path)));}
+ static void Dispose(object job){Call(job,"Dispose");}
+ static void Write(string path,string text,bool bom){File.WriteAllText(path,text,new UTF8Encoding(bom,true));}
+ static byte[] HashBytes(string path){return File.ReadAllBytes(path);}
+ static bool Same(byte[] a,byte[] b){if(a.Length!=b.Length)return false;for(int i=0;i<a.Length;i++)if(a[i]!=b[i])return false;return true;}
+ static void CopyTree(string source,string target){Directory.CreateDirectory(target);foreach(string file in Directory.GetFiles(source))File.Copy(file,Path.Combine(target,Path.GetFileName(file)));foreach(string dir in Directory.GetDirectories(source))CopyTree(dir,Path.Combine(target,Path.GetFileName(dir)));}
+ static bool Failed(Action action,Type type){try{action();return false;}catch(Exception ex){return type.IsInstanceOfType(ex);}}
+ static string[] TempDirs(){return Directory.GetDirectories(Path.GetTempPath(),"SUB-OpenCC-*");}
+ public static int Main(string[] args){string work=Path.Combine(Path.GetTempPath(),"SUB-Traditional-tests-"+Guid.NewGuid().ToString("N"));try{
+  Assembly assembly=args.Length>1?Assembly.LoadFrom(args[1]):Assembly.GetExecutingAssembly();jobType=assembly.GetType("SubtitleStudio.TraditionalJob");Assert(jobType!=null,"TraditionalJob is implemented");
+  root=args[0];Directory.CreateDirectory(work);int initialTemp=TempDirs().Length;
+  string source=Path.Combine(work,"混合换行.srt");string input="001\r\n00:00:00,000 --> 00:00:01,500 X1:10\n\u00A0\u3000\t<i data-name=\"简体\">汉语龙门国</i>\t\u3000\u00A0\r\n{\\an8}头发发展\n\r\n007\n00:00:02,000 --> 00:00:03,000\r\n学习汉字 OpenAI 123!\n<i></i>\r\n";Write(source,input,true);byte[] original=HashBytes(source);
+  int progressed=0;object job=Job(delegate{});jobType.GetProperty("Progress").SetValue(job,new Action<int,int>(delegate(int done,int total){if(done==total)progressed++;}),null);
+  Dictionary<string,object> report;try{report=Run(job,source);}finally{Dispose(job);}string output=(string)report["output"];byte[] rendered=File.ReadAllBytes(output);string text=new UTF8Encoding(false,true).GetString(rendered,3,rendered.Length-3);
+  string expected=input.Replace("汉语龙门国","漢語龍門國").Replace("头发发展","頭髮發展").Replace("学习汉字","學習漢字");
+  Assert(text==expected,"exact IDs, timecodes, mixed newlines, multiline, Unicode padding and protected tags");Assert(rendered[0]==239 && rendered[1]==187 && rendered[2]==191,"UTF-8 BOM retained");Assert(Same(original,HashBytes(source)),"source bytes unchanged");Assert(output==Path.Combine(work,"混合换行_繁体.srt"),"distinct Traditional suffix");Assert(progressed>0,"progress reaches total cues");
+  Assert((string)report["target_language_code"]=="zh-Hant","report Traditional language code");Assert((string)report["target_language"]=="繁体中文","report Traditional language name");Assert((string)report["mode"]=="local" && (string)report["backend"]=="OpenCC","report local OpenCC backend");Assert(Convert.ToInt32(report["model_requests"])==0,"zero model requests");Assert((bool)report["timeline_exact"] && (bool)report["source_unchanged"] && (bool)report["source_format_tags_preserved"],"report preservation evidence");
+  byte[] first=HashBytes(output);job=Job(delegate{});Dictionary<string,object> second;try{second=Run(job,source);}finally{Dispose(job);}Assert(((string)second["output"]).EndsWith("_繁体_2.srt",StringComparison.Ordinal),"collision uses new numbered output");Assert(Same(first,HashBytes(output)),"collision never overwrites prior output");Assert(Same(first,HashBytes((string)second["output"])),"conversion is deterministic");
+  string plain=Path.Combine(work,"无BOM.srt");Write(plain,"1\n00:00:00,000 --> 00:00:01,000\n汉字",false);job=Job(delegate{});Dictionary<string,object> plainReport;try{plainReport=Run(job,plain);}finally{Dispose(job);}Assert(Same(new UTF8Encoding(false).GetBytes("1\n00:00:00,000 --> 00:00:01,000\n漢字"),HashBytes((string)plainReport["output"])),"no BOM and missing final newline retained");
+  foreach(bool bigEndian in new[]{false,true}){string utf16=Path.Combine(work,bigEndian?"大端BOM.srt":"小端BOM.srt");var encoding=new UnicodeEncoding(bigEndian,true,true);string utf16Input="1\r\n00:00:00,000 --> 00:00:01,000\r\n汉字\r\n";File.WriteAllText(utf16,utf16Input,encoding);job=Job(delegate{});Dictionary<string,object> utf16Report;try{utf16Report=Run(job,utf16);}finally{Dispose(job);}byte[] utf16Bytes=HashBytes((string)utf16Report["output"]);Assert(utf16Bytes[0]==(bigEndian?254:255) && utf16Bytes[1]==(bigEndian?255:254),bigEndian?"UTF-16 BE BOM retained":"UTF-16 LE BOM retained");Assert(encoding.GetString(utf16Bytes,2,utf16Bytes.Length-2)==utf16Input.Replace("汉字","漢字"),"UTF-16 content and line layout retained");}
+  string cancelSource=Path.Combine(work,"取消.srt");Write(cancelSource,"1\n00:00:00,000 --> 00:00:01,000\n汉字\n",false);job=Job(delegate{});Call(job,"Cancel");try{Assert(Failed(delegate{Run(job,cancelSource);},typeof(OperationCanceledException)),"cancel before start rejects work");}finally{Dispose(job);}Assert(!File.Exists(Path.Combine(work,"取消_繁体.srt")),"cancel before start writes no output");
+  string cancelProgress=Path.Combine(work,"完成前取消.srt");File.Copy(cancelSource,cancelProgress);job=Job(delegate{});object toCancel=job;jobType.GetProperty("Progress").SetValue(job,new Action<int,int>(delegate{Call(toCancel,"Cancel");}),null);try{Assert(Failed(delegate{Run(toCancel,cancelProgress);},typeof(OperationCanceledException)),"cancel from progress before final write");}finally{Dispose(job);}Assert(!File.Exists(Path.Combine(work,"完成前取消_繁体.srt")),"late cancellation saves no output");
+  string changed=Path.Combine(work,"源变化.srt");File.Copy(cancelSource,changed);job=Job(delegate{});jobType.GetProperty("Progress").SetValue(job,new Action<int,int>(delegate{File.AppendAllText(changed,"\n",Encoding.UTF8);}),null);object changing=job;try{Assert(Failed(delegate{Run(changing,changed);},typeof(Exception)),"source SHA change prevents saving");}finally{Dispose(job);}Assert(!File.Exists(Path.Combine(work,"源变化_繁体.srt")),"changed source has no output");
+  string malformed=Path.Combine(work,"坏字幕.srt");Write(malformed,"1\n00:99:00,000 --> 00:00:01,000\n汉字\n",false);job=Job(delegate{});object bad=job;try{Assert(Failed(delegate{Run(bad,malformed);},typeof(Exception)),"malformed SRT fails");}finally{Dispose(job);}Assert(!File.Exists(Path.Combine(work,"坏字幕_繁体.srt")),"malformed SRT has no output");
+  string empty=Path.Combine(work,"空字幕.srt");Write(empty,"",false);job=Job(delegate{});object emptyJob=job;try{Assert(Failed(delegate{Run(emptyJob,empty);},typeof(Exception)),"empty SRT fails");}finally{Dispose(job);}
+  string moved=Path.Combine(work,"移动工具 空格 ' 路径");CopyTree(Path.Combine(root,"opencc"),Path.Combine(moved,"opencc"));root=moved;Assert(!Directory.Exists(Path.Combine(root,"models")) && !Directory.Exists(Path.Combine(root,"codex")),"relocated app has no model or Codex");job=Job(delegate{});Dictionary<string,object> movedReport;try{movedReport=Run(job,plain);}finally{Dispose(job);}Assert((string)movedReport["backend"]=="OpenCC" && File.ReadAllText((string)movedReport["output"],Encoding.UTF8).Contains("漢字"),"root relative engine survives relocation");Assert(!Directory.Exists(Path.Combine(root,"models")) && !Directory.Exists(Path.Combine(root,"data")) && !Directory.Exists(Path.Combine(root,"codex")),"local conversion creates no models, auth or caches");Assert(TempDirs().Length==initialTemp,"private OpenCC temp directories cleaned");
+  Console.WriteLine("Traditional tests passed: "+checks);return 0;
+ }catch(Exception ex){Console.Error.WriteLine(ex.Message);return 1;}finally{if(Directory.Exists(work))Directory.Delete(work,true);}}
+}

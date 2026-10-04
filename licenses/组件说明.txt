@@ -1,0 +1,30 @@
+﻿Qwen3-4B-Instruct-2507 / Q4_K_M
+Base publisher: Qwen (official), GGUF publisher: Unsloth
+License: Apache-2.0 (Qwen-Apache-2.0.txt)
+Revision: a06e946bb6b655725eafa393f4a9745d460374c9
+SHA256: 3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597
+https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF
+
+llama.cpp CPU / Vulkan Windows x64 binaries
+Release: b11372
+License: MIT (llama.cpp-MIT.txt)
+https://github.com/ggml-org/llama.cpp/releases/tag/b11372
+LLVM OpenMP license is supplied in each engine directory (LICENSE-LLVM-OpenMP).
+
+Microsoft Visual C++ Runtime app-local DLLs
+msvcp140.dll / vcruntime140.dll / vcruntime140_1.dll
+Version: from the build computer's installed Microsoft Visual C++ v14 x64 runtime; recorded by file hashes in the generated manifest.
+Microsoft copyright and software license terms apply. Build scripts copy retail runtime DLLs only after checking a valid Microsoft signature. Developer redistribution terms apply separately. Do not treat these files as open-source components.
+App-local deployment documentation:
+https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files
+Microsoft licensing and redistributable-file list:
+https://visualstudio.microsoft.com/license-terms/
+https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution
+
+The optional Vulkan engine uses the computer's existing Vulkan graphics driver. If unavailable, the tool uses the bundled CPU engine.
+
+OpenCC 1.4.2：Apache-2.0，本机 s2t 简体转繁体引擎与词典；来源和原始资产 SHA256 见 components.json 和 runtime-lock.json。许可证：OpenCC-LICENSE.txt。
+
+Official Codex CLI package 0.160.0: Apache-2.0 for Codex; bundled voice dependencies have their own notices in online/codex-resources/voice. The complete upstream layout is preserved.
+

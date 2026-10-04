@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "platform": "windows-x64",
+  "assets": [
+    {
+      "kind": "zip",
+      "id": "traditional",
+      "url": "https://github.com/BYVoid/OpenCC/releases/download/ver.1.4.2/OpenCC-1.4.2-windows-x64-portable.zip",
+      "marker": "bin/opencc.exe",
+      "destination": "opencc",
+      "file": "OpenCC-1.4.2-windows-x64-portable.zip",
+      "version": "1.4.2",
+      "sha256": "dab0142ff6401219a5e556cee215323753eeac38752dde4cfddf8035746605f1"
+    },
+    {
+      "kind": "zip",
+      "id": "cpu",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11372/llama-b11372-bin-win-cpu-x64.zip",
+      "marker": "llama-server.exe",
+      "destination": "engine",
+      "file": "llama-b11372-bin-win-cpu-x64.zip",
+      "version": "b11372",
+      "sha256": "b3b7a34ed8e9021e615db50552a813002c9acbe491a1a510dd3a2224a64334b3"
+    },
+    {
+      "kind": "zip",
+      "id": "vulkan",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11372/llama-b11372-bin-win-vulkan-x64.zip",
+      "marker": "llama-server.exe",
+      "destination": "engine-vulkan",
+      "file": "llama-b11372-bin-win-vulkan-x64.zip",
+      "version": "b11372",
+      "sha256": "adc51afa44908290f68fc5d05663f638b518b7f5025a8a5e64a8e5586b9948ef"
+    },
+    {
+      "kind": "tar.gz",
+      "id": "online",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.160.0/codex-package-x86_64-pc-windows-msvc.tar.gz",
+      "marker": "bin/codex.exe",
+      "destination": "online",
+      "file": "codex-package-x86_64-pc-windows-msvc.tar.gz",
+      "version": "0.160.0",
+      "sha256": "7f7fbbc8d6fd4ea2f3b13855ef47ea59663ba7e61fb2e9821df37163b8030891"
+    },
+    {
+      "id": "model",
+      "url": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "size": 2497281120,
+      "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "marker": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+      "version": "a06e946bb6b655725eafa393f4a9745d460374c9",
+      "kind": "file",
+      "destination": "models"
+    }
+  ]
+}

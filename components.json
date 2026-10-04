@@ -1,0 +1,70 @@
+﻿{
+  "engine": {
+    "cpu": "https://github.com/ggml-org/llama.cpp/releases/download/b11372/llama-b11372-bin-win-cpu-x64.zip",
+    "license": "MIT",
+    "vulkan": "https://github.com/ggml-org/llama.cpp/releases/download/b11372/llama-b11372-bin-win-vulkan-x64.zip",
+    "release": "b11372"
+  },
+  "model": {
+    "license": "Apache-2.0",
+    "publisher": "Qwen",
+    "name": "Qwen3-4B-Instruct-2507",
+    "quantization_publisher": "Unsloth",
+    "revision": "a06e946bb6b655725eafa393f4a9745d460374c9",
+    "quantization": "Q4_K_M",
+    "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+    "url": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "size": 2497281120
+  },
+  "online": {
+    "repository": "https://github.com/openai/codex",
+    "auth": "Official CLI login on the current computer; credentials are never stored in the project",
+    "license": "Apache-2.0",
+    "archive_sha256": "7f7fbbc8d6fd4ea2f3b13855ef47ea59663ba7e61fb2e9821df37163b8030891",
+    "source": "https://github.com/openai/codex/releases/download/rust-v0.160.0/codex-package-x86_64-pc-windows-msvc.tar.gz",
+    "publisher": "OpenAI",
+    "documentation": [
+      "https://github.com/openai/codex"
+    ],
+    "version": "0.160.0"
+  },
+  "ui": {
+    "version": "SUB-multilingual-v5-20261004",
+    "framework": "System .NET Framework WPF",
+    "artwork": "Original geometric SUB glyphs drawn with local vector code",
+    "svg": "assets/sub.svg",
+    "icon": "assets/sub.ico",
+    "embedded_resources": [
+      "Ui.xaml",
+      "sub.png",
+      "Windows multi-size icon"
+    ],
+    "reference": "https://developer.apple.com/design/human-interface-guidelines/materials"
+  },
+  "traditional": {
+    "version": "1.4.2",
+    "officialAssetSHA256": "DAB0142FF6401219A5E556CEE215323753EEAC38752DDE4CFDDF8035746605F1",
+    "project": "BYVoid/OpenCC",
+    "mechanism": "Bundled local OpenCC; no model, login or network",
+    "source": "https://github.com/BYVoid/OpenCC/releases/download/ver.1.4.2/OpenCC-1.4.2-windows-x64-portable.zip",
+    "license": "Apache-2.0",
+    "config": "opencc/share/opencc/s2t.json"
+  },
+  "targets": [
+    "zh-Hant",
+    "en",
+    "ja",
+    "ko",
+    "th",
+    "hi",
+    "es",
+    "it"
+  ],
+  "translation": {
+    "onlineVersion": "studio-online-multilingual-v3-20261004",
+    "offlineHindi": "Local English meaning reference followed by Hindi, all within bundled model",
+    "style": "Natural concise spoken language with protected formatting",
+    "cache": "Mode, version, target, source SHA256 and topic isolated",
+    "offlineVersion": "offline-multilingual-v5-20261004"
+  }
+}
